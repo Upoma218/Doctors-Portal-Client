@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppointmentBanner from './AppointmentBanner/AppointmentBanner';
+import AvailableAppointments from './AvailableAppointments/AvailableAppointments';
 
 const Appointment = () => {
+    
+    const [selectedDate, setSelectedDate] = useState(new Date())
+
     return (
-        <div>
-            <AppointmentBanner></AppointmentBanner>
+        <div className='mx-auto p-5'>
+            <AppointmentBanner selectedDate={selectedDate} setSelectedDate={setSelectedDate}></AppointmentBanner>
+            <AvailableAppointments selectedDate={selectedDate}></AvailableAppointments>
         </div>
     );
 };
