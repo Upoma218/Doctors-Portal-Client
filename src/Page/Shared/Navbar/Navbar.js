@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../../../Context/AuthProvider';
 
 const Navbar = () => {
+    const {user, logOut} = useContext(AuthContext);
+    const handleLogOut = () => {
+        logOut()
+            .then(() => { })
+            .catch(err => console.log(err));
+    }
 
     const menuItems = <React.Fragment>
         <li><Link to='/'>Home</Link></li>
@@ -9,6 +16,18 @@ const Navbar = () => {
         <li><Link to='/appointment'>Appointment</Link></li>
         <li><Link to='/reviews'>Reviews</Link></li>
         <li><Link to='/contactUs'>Contact Us</Link></li>
+        <li>
+            {
+                user?.uid ?
+                <>
+                <li><Link to='/dashboard'>Dashboard</Link></li>
+                <button onClick={handleLogOut}>Logout</button>
+                </>
+                :
+                <Link to='/login'>Login</Link>
+                
+            }
+        </li>
     </React.Fragment>
 
     return (
@@ -24,7 +43,7 @@ const Navbar = () => {
                 </div>
                 <Link to='/' className="btn btn-ghost normal-case text-xl ml-5">Doctors Portal</Link>
             </div>
-            <div className="navbar-end hidden lg:flex mr-10">
+            <div className=" hidden lg:flex mr-10">
                 <ul className="menu menu-horizontal p-0">
                     {menuItems}
                 </ul>
