@@ -1,18 +1,34 @@
+import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import Loading from '../../../Shared/Loading/Loading';
 import BookingModal from '../../BookingModal/BookingModal';
 import AvailableAppointment from './AvailableAppointment';
 
-const AvailableAppointments = ({selectedDate}) => {
-    const [appointmentOptions,setAppointmentOptions] = useState(null);
-    useEffect(() => {
-        fetch('appointmentOptions.json')
-        .then(res => res.json())
-        .then(data => setAppointmentOptions(data))
-        
-    },[])
-    const [treatment,setTreatment] = useState([]);
-    
+const AvailableAppointments = ({ selectedDate }) => {
+    const [treatment, setTreatment] = useState(null);
+    // const [appointmentOptions,setAppointmentOptions] = useState(null);
+    const date = format(selectedDate,'PP');
+
+    const { data: appointmentOptions = [],refetch,isLoading } = useQuery({
+        queryKey: ['appointmentOptions',date],
+        queryFn: async () => {
+            const res = await fetch(`http://localhost:5000/v2/appointmentOptions?date=${date}`)
+            const data = await res.json()
+            return data;
+        }
+        })
+
+    // useEffect(() => {
+    //     fetch('http://localhost:5000/appointmentOptions')
+    //     .then(res => res.json())
+    //     .then(data => setAppointmentOptions(data))
+
+    // },[])
+    if(isLoading){
+        return <Loading></Loading>
+    }
+
     return (
         <section>
             <h1 className='text-center text-teal-500 font-semibold text-2xl p-16'>Available Appointments on {format(selectedDate, 'PP')}</h1>
@@ -24,8 +40,10 @@ const AvailableAppointments = ({selectedDate}) => {
             </div>
             {
                 treatment &&
-                <BookingModal 
-                treatment={treatment} selectedDate={selectedDate} setTreatment={setTreatment}>
+                <BookingModal
+                    treatment={treatment} selectedDate={selectedDate} setTreatment={setTreatment}
+                    refetch={refetch}
+                    >
                 </BookingModal>
             }
         </section>

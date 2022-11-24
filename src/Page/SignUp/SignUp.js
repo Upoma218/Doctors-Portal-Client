@@ -1,14 +1,20 @@
 import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthProvider';
+import useToken from '../../Hooks/useToken';
 
 const SignUp = () => {
     const {createUser, updateUser} = useContext(AuthContext)
     const [signUpError, setSignUpError ] = useState();
     const {register, handleSubmit , formState: {errors}} = useForm();
-
+    const [createdUserEmail, setCreatedUserEmail] = useState('');
+    const [token] = useToken(createdUserEmail);
+    const navigate = useNavigate();
+    if(token){
+        navigate('/');
+    }
 const handleSignUp = data => {
     setSignUpError('');
     createUser(data.email, data.password)
@@ -20,7 +26,10 @@ const handleSignUp = data => {
             displayName: data.name,
         }
         updateUser(userInfo)
-        .then(() => {})
+        .then(() => {
+            saveUser(data.name, data.email)
+        })
+        
         .catch(error => console.error(error))
     })
     .catch(error => {
@@ -28,6 +37,23 @@ const handleSignUp = data => {
         setSignUpError(error.message);
     })
 }
+
+const saveUser = (name, email) =>{
+    const user = {name, email};
+    fetch('http://localhost:5000/users', {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+        },
+        body: JSON.stringify(user)
+    })
+    .then(res=> res.json()
+    .then(data =>  {
+        setCreatedUserEmail(email)
+    }))
+}
+
+
 
     return (
         <div className='h-[800px] flex justify-center items-center border  '>
@@ -59,6 +85,7 @@ const handleSignUp = data => {
                             {errors.password && <p className='text-red-600 my-2'>{errors.password.message}</p> }
                     </div>
                     <input className='btn btn-accent w-full text-white' value="Sign Up" type="submit" />
+                    {signUpError && <p className='text-red-600 py-3'>{signUpError}</p>}
                 </form>
                 <p className='my-3'>Already have an account? <Link className='text-info' to="/login">Login Now</Link></p>
             </div>
